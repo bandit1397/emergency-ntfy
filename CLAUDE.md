@@ -57,7 +57,7 @@
   ntfy 앱은 같은 sequence_id 의 새 알림이 오면 이전 것을 지움 (새 알림은 그대로 울림). 노트 FE 에서 4개 보내 3개 남음 확인.
   이 기능 이전에 쌓인 알림은 그대로 남음 (앱에서 직접 지우거나 1달 뒤 자동 삭제)
 - **즉시 전달(instant) 필수**: 22:07 · 22:08 요청이 노트 FE 에 FCM 으로 안 옴 (서버에는 있음). 구독 설정 → 즉시 전달 켜자
-  JSON stream 연결(`/json?since=<마지막 id>`)로 못 받은 2건이 3초 만에 들어와 울림. 노트 FE 켜짐, **A90 은 아직 꺼져 있음**.
+  JSON stream 연결(`/json?since=<마지막 id>`)로 못 받은 2건이 3초 만에 들어와 울림. 노트 FE · A90 모두 켬 (A90 은 Wi-Fi 가 꺼져 있어 켠 뒤 CONNECTED 확인).
   2건이 동시에 오면 두 번째 `Media player: Failed to play insistent alarm` (IllegalStateException) — 첫 번째가 울리므로 무해
 - ntfy.sh → 휴대폰 FCM 전달이 가끔 수십 초~몇 분 늦을 때가 있었음 (시험 알림을 많이 보낸 뒤)
 
