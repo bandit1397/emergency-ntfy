@@ -135,13 +135,15 @@ function ntfyMessage_(req) {
   const msg = {
     topic: ntfyTopic_(req.region),
     title: `수용 요청 — ${req.region} · ${req.type}`, // 🚨 는 tags 로 앞에 붙는다
-    // ntfy 의 '계속 울리기'는 ntfy 의 토픽 화면이 열릴 때 멈춘다. click 을 넣으면 알림을 눌러도 웹앱만 열리고
-    // 계속 울리므로(2026-10-25 확인) click 은 넣지 않고, 웹앱 주소는 본문에 둔다 (ntfy 화면에서 링크로 눌림).
-    message: `요청 ${req.id}. 이 알림을 누르면 알람이 멈춥니다.` + (url ? `\n앱 열기: ${url}?from=ntfy` : ''),
+    // ntfy 의 '계속 울리기'는 ntfy 의 토픽 화면이 새로 열릴 때 멈춘다. click 을 넣으면 알림을 눌러도 웹앱만 열리고
+    // 계속 울리므로(2026-10-25 확인) click 은 넣지 않는다. 알림 본문 → ntfy 화면(알람 멈춤) → '환자 수용 요청 열기' 버튼.
+    // 같은 버튼이 알림에도 보이는데, 거기서 누르면 웹앱은 열리지만 알람은 계속 → 웹앱 배너로 끈다.
+    message: `요청 ${req.id}. 이 알림을 누르면 알람이 멈춥니다.`,
     priority: 5,
     tags: ['rotating_light'],
     sequence_id: ntfySlot_(req.region),
   };
+  if (url) msg.actions = [{ action: 'view', label: '환자 수용 요청 열기', url: url, clear: true }];
   return { server: CONFIG.NTFY_SERVER, body: msg };
 }
 

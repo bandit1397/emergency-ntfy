@@ -135,7 +135,8 @@
         <li>ntfy 앱 위쪽에 <b>배터리 최적화</b> 안내가 보이면 <b>지금 수정하기</b> → 허용.</li>
         <li>ntfy 앱 첫 화면 ⋮ → <b>설정</b> → <b>Keep alerting for highest priority</b>를 켭니다 (누를 때까지 계속 울림).</li>
       </ol>
-      <p><b>🔕 알람 끄기:</b> 알림을 <b>누르면</b> 알람이 멈추고 ntfy 화면이 열립니다 → 그 화면 메시지의 <b>앱 열기</b> 링크를 누르면 이 앱이 열립니다.
+      <p><b>🔕 알람 끄기:</b> 알림을 <b>누르면</b> 알람이 멈추고 ntfy 화면이 열립니다 → 그 화면의 <b>환자 수용 요청 열기</b> 버튼을 누르면 이 앱이 열립니다.
+        ntfy 화면을 열어 둔 채로 두지 말고 이 앱으로 돌아오세요 (열어 둔 채 잠기면 다음 알람이 알림을 눌러도 안 멈출 수 있음).
         이 앱에서 빨간 <b>응답 대기</b> 배너나 <b>수용 가능/불가</b>를 눌러도 알람이 멈춥니다 (ntfy 화면이 잠깐 열림 → 뒤로 가기).
         (알림을 옆으로 밀어 지우면 소리가 멈추지 않을 수 있습니다. 안 멈추면 ntfy 앱을 여세요.)</p>
       <p class="muted">새 요청이 오면 무음 모드에서도 알람처럼 울리고, 알림을 누를 때까지 계속 울립니다. 알림에는 지역·유형·요청번호만 담기고 환자 상태는 담기지 않습니다.
@@ -174,7 +175,6 @@ let silenced = [];         // 병원: 배너를 눌러 소리를 끈 요청 id (
 const IS_ANDROID = /Android/i.test(navigator.userAgent);
 let ntfyLinks = {};        // 지역 → ntfy://ntfy.sh/<topic>
 let ntfyQuiet = load('par_ntfy_quiet', []); // ntfy 알람을 이미 끈 요청 id (다시 ntfy 로 넘어가지 않음)
-let fromNtfy = false;      // ntfy 알림의 '앱 열기' 링크로 들어옴 = 알람은 이미 꺼짐
 
 const $ = (id) => document.getElementById(id);
 
@@ -459,11 +459,6 @@ function renderHospital(data) {
   pendingCount = pend.length;
   pendingIds = pend.map((r) => r.id);
   pendingRegion = pend.length ? pend[0].region : '';
-  if (fromNtfy) {
-    ntfyQuiet = ids.concat(ntfyQuiet).slice(0, 50);
-    save('par_ntfy_quiet', ntfyQuiet);
-    fromNtfy = false;
-  }
   $('hAlarm').textContent = `🚨 응답 대기 중인 요청 ${pendingCount}건 — 수용 가능/불가를 눌러 주세요` +
     (pendingIds.every((id) => silenced.includes(id)) ? ' (소리 꺼짐)' : ' · 여기를 누르면 소리가 꺼집니다');
   $('hAlarm').classList.toggle('hidden', !pendingCount);
@@ -562,9 +557,6 @@ function stopPolling() { clearInterval(pollTimer); pollTimer = null; updateRingi
 document.addEventListener('visibilitychange', () => { if (!document.hidden && pollTimer) refresh(); });
 
 /* ---------- 시작 ---------- */
-try {
-  google.script.url.getLocation((loc) => { if (loc.parameter && loc.parameter.from === 'ntfy') fromNtfy = true; });
-} catch (e) {}
 call('getConfig').then((c) => {
   cfg = c;
   if (profile && (!cfg.needsCode || profile.code)) enter();

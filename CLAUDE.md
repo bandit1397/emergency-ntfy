@@ -16,7 +16,7 @@
 
 ## 알림 흐름
 
-1. 경찰관 `createRequest` → 서버가 `ntfy` 내용(topic, title, message(앱 열기 링크 포함), priority 5, tags, sequence_id — click 없음)을 돌려줌
+1. 경찰관 `createRequest` → 서버가 `ntfy` 내용(topic, title, message, priority 5, tags, sequence_id, actions[view '환자 수용 요청 열기'] — click 없음)을 돌려줌
 2. **경찰관 브라우저가** `https://ntfy.sh/` 로 JSON 을 `Content-Type: text/plain` 으로 POST (사전 확인 없음, CORS 허용).
    Apps Script 서버(UrlFetchApp)는 ntfy.sh 에 접속할 수 없음 (Google 차단, 이전 프로젝트에서 확인)
 3. 병원 화면 `ntfyTopics(code, regions)` → `ntfy://ntfy.sh/<topic>` 구독 버튼 (누르면 ntfy 앱에서 바로 구독됨)
@@ -49,10 +49,14 @@
   그 화면의 링크를 누르니 웹앱 열림 (임시 토픽으로 확인)
 - 웹앱에서도 알람 끄기 (사용자 요청: 배너 · 수용 가능/불가 · 알림 세 곳 모두에서 끄기):
   Android 에서 배너/응답 버튼을 누르면 그 순간 `ntfy://ntfy.sh/<topic>` 을 `<a target=_blank>` 로 열어 토픽 화면을 띄움
-  (구독 버튼과 같은 방식). 요청마다 한 번만 (localStorage `par_ntfy_quiet`). 알림의 '앱 열기' 링크는 `?from=ntfy` 를
-  붙여 그 경로로 들어오면 이미 꺼진 것으로 봄. 배너는 웹앱 소리도 끔 (새 요청이 오면 다시 울림)
+  (구독 버튼과 같은 방식). 요청마다 한 번만 (localStorage `par_ntfy_quiet`). 배너는 웹앱 소리도 끔 (새 요청이 오면 다시 울림)
   → 배포 후 노트 FE 에서 요청 2213-EP7 때 사용자가 배너를 누르니 소리 꺼짐 (Chrome 위에 ntfy DetailActivity 열림 확인).
   수용 가능/불가 버튼은 같은 함수(stopNtfyAlarm)를 쓰지만 따로 시험하지는 않음
+- **알림 본문 주소 → 버튼으로 (사용자 요청)**: 본문의 '앱 열기: <url>' 대신 ntfy action `view` '환자 수용 요청 열기'(clear).
+  알림 본문 → ntfy 화면(알람 멈춤) → 화면 카드의 버튼 → 웹앱 (A90 에서 버튼으로 삼성 인터넷 열림 확인). `?from=ntfy` 는 없앰
+  (알림의 버튼으로 바로 웹앱을 열면 알람이 계속 울리므로, 웹앱 배너/응답 버튼으로 끌 수 있게).
+- **알람이 안 멈춘 경우 (A90, 2254-SLP)**: `mediaPlayer.stop()` 은 DetailActivity `loadView()`(onCreate) 에만 있음.
+  ntfy 토픽 화면이 맨 앞인 채로 잠겼다가 풀면 그 화면이 onResume → 알림만 지우고 알람은 계속. → 사용자 안내로 대응
 - 최근 3개만 남기기: 알림에 `sequence_id` = 지역별 `slot-1..3` 을 돌려 씀 (스크립트 속성 `NTFY_SLOT_<지역번호>`).
   ntfy 앱은 같은 sequence_id 의 새 알림이 오면 이전 것을 지움 (새 알림은 그대로 울림). 노트 FE 에서 4개 보내 3개 남음 확인.
   이 기능 이전에 쌓인 알림은 그대로 남음 (앱에서 직접 지우거나 1달 뒤 자동 삭제)
