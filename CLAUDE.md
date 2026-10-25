@@ -38,7 +38,13 @@
 
 ## 남은 일 (2026-10-25 기준)
 
-- 시험 끝나면 휴대폰 USB 디버깅 끄기
+- 시험 끝나면 휴대폰 USB 디버깅 끄기 (A90, 노트 FE 둘 다)
+
+### 두 번째 시험 휴대폰: 갤럭시 노트 FE (SM-N935S · 안드로이드 9 · ntfy 1.25.2), 2026-10-25
+
+- 소리가 안 나던 원인: ntfy 구독 없음 + "Keep alerting" 꺼짐
+- 서울 토픽 구독, Keep alerting 켬, `ntfy-max` 소리 = Emergency Siren (wail), 저장공간 권한 허용
+  → 화면 꺼짐에서 시험 알림 → `USAGE_ALARM` 으로 계속 울림 확인
 
 ### 완료 (2026-10-25)
 
@@ -54,4 +60,7 @@
   - ntfy 의 '계속 울리기' 소리 = **"우선순위 최상"(`ntfy-max`) 알림 채널의 소리** (ntfy-android `NotificationService.getInsistentSound`)
   - 파이썬으로 직접 만든 사이렌 (`docs/sounds/`, 만드는 스크립트 `make_sirens.py`, README 에 설정 방법) `siren_wail.ogg`("Emergency Siren (wail)") · `siren_yelp.ogg`("Emergency Bell (fast)") 를
     휴대폰 `/sdcard/Notifications/` 에 넣음 → `ntfy-max` 채널 소리 = Emergency Siren (wail)
+  - **주의**: 채널 소리를 휴대폰 저장공간 파일로 바꾸면 ntfy 에 `READ_EXTERNAL_STORAGE` 가 있어야 함. 없으면
+    `Media player: Failed to play insistent alarm` (Permission Denial) → 알림 소리 1번만, 계속 울리기 안 됨.
+    `adb shell pm grant io.heckel.ntfy android.permission.READ_EXTERNAL_STORAGE` 로 해결 (노트 FE · 안드로이드 9 에서 확인)
   - 채널 설정 바로 열기: `adb shell am start -a android.settings.CHANNEL_NOTIFICATION_SETTINGS --es android.provider.extra.APP_PACKAGE io.heckel.ntfy --es android.provider.extra.CHANNEL_ID ntfy-max`
