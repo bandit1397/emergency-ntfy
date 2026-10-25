@@ -47,6 +47,9 @@
 - ntfy 옛 시험 구독 삭제 → 남은 구독은 `par-4jypj546izg5tb57-1`(서울) 하나,
   ntfy 배터리 최적화 해제 (`adb shell dumpsys deviceidle whitelist +io.heckel.ntfy`)
 - 위 정리 후 화면 꺼짐 상태에서 시험 알림 → 한글 제목 · 본문 정상 표시, `USAGE_ALARM` 으로 울림
+- 웹앱이 버전 1(첫 커밋 코드)로 배포되어 있던 것을 발견 → 편집기는 이미 `ea3867d` 와 같았고, 사용자가 새 버전으로 배포함
+  (배포된 /exec 화면에 새 문구 "🔕 알람 끄기" 있음 확인). 배포 여부는 ntfy 알림 문구로도 알 수 있음:
+  옛 버전 = 제목 🚨🚨 · "눌러서 앱을 열고…", 최신 = 🚨 하나 · "이 알림을 누르면 알람이 멈춥니다"
 - 알람음을 사이렌으로 변경 → 시험 알림에서 사이렌으로 울림 확인 (사용자가 "잘 울려요"라고 확인)
   - ntfy 의 '계속 울리기' 소리 = **"우선순위 최상"(`ntfy-max`) 알림 채널의 소리** (ntfy-android `NotificationService.getInsistentSound`)
   - 파이썬으로 직접 만든 사이렌 (`docs/sounds/`, 만드는 스크립트 `make_sirens.py`, README 에 설정 방법) `siren_wail.ogg`("Emergency Siren (wail)") · `siren_yelp.ogg`("Emergency Bell (fast)") 를
