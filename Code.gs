@@ -132,7 +132,7 @@ function ntfyMessage_(req) {
   const url = appUrl_();
   const msg = {
     topic: ntfyTopic_(req.region),
-    title: `🚨 수용 요청 — ${req.region} · ${req.type}`,
+    title: `수용 요청 — ${req.region} · ${req.type}`, // 🚨 는 tags 로 앞에 붙는다
     message: `요청 ${req.id}. 눌러서 앱을 열고 수용 가능/불가를 눌러 주세요.`,
     priority: 5,
     tags: ['rotating_light'],

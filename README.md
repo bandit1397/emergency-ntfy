@@ -30,6 +30,15 @@
 
 병원끼리는 서로의 병원명을 볼 수 없고 응답 집계(가능 n곳 등)만 봅니다.
 
+## 바로 접속 (QR 코드)
+
+| 🌐 웹앱 (경찰관·병원 같은 주소) | 🔔 ntfy 앱 (병원 휴대폰) |
+|:---:|:---:|
+| <img src="docs/qr-webapp.svg" width="200" alt="웹앱 QR"> | <img src="docs/qr-ntfy.svg" width="200" alt="ntfy Play 스토어 QR"> |
+| 열고 **👮 경찰관** 또는 **🏥 병원** 선택 | Play 스토어에서 설치 |
+
+웹앱 주소: https://script.google.com/macros/s/AKfycbz-AdqsI0QU7ExhjOUC4_ULq8Das9895_s19KK65fi9wDRY7jpSte-YJr-u-ykqiJgvZg/exec
+
 ## 설치 (관리자 1회, 약 5분)
 
 1. https://script.google.com 접속 → **새 프로젝트** (이름 예: `Emergency ntfy`)
@@ -61,6 +70,7 @@
 
 시험 결과 (2026-10-25, 갤럭시 A90 · 안드로이드 12 · ntfy 1.25.2): 화면 꺼짐 · 무음 모드에서 보낸 지 약 1~2초 만에
 화면이 켜지고 알람 채널로 소리가 났으며, 알림을 누를 때까지 계속 울렸습니다.
+배포된 웹앱으로 처음부터 끝까지(병원 화면 구독 버튼 → 경찰관 요청 → 휴대폰 알람)도 약 1.8초 만에 동작했습니다.
 
 ## 설정 변경
 
