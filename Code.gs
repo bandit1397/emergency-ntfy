@@ -16,7 +16,8 @@ const CONFIG = {
   // 화면이 꺼져도 오는 알림: ntfy 앱 (무료, 회원가입 없음). Apps Script 서버는 ntfy.sh 에 접속할 수 없어
   // 경찰관 브라우저가 직접 보낸다. 토픽 이름은 스크립트 속성 NTFY_PREFIX 에 무작위로 만들어 저장한다.
   NTFY_SERVER: 'https://ntfy.sh',
-  NTFY_KEEP: 3, // ntfy 앱에 남길 최근 요청 알림 수 (지역별). 더 오래된 알림은 앱에서 자동으로 지워진다.
+  // 지역별로 남길 최근 요청 수. 새 요청이 오면 가장 오래된 요청부터 밀어내서 지운다 (웹앱 목록 · ntfy 앱 모두).
+  NTFY_KEEP: 3,
 };
 
 const CACHE_KEY = 'state_v1';
@@ -61,6 +62,16 @@ function createRequest(code, data) {
   mutate_((state, changed) => {
     state[req.id] = req;
     changed.push(req.id);
+    // 같은 지역의 요청은 최근 NTFY_KEEP 개만 남긴다 (오래된 것부터 밀어내기).
+    Object.keys(state)
+      .map((id) => state[id])
+      .filter((r) => r.region === req.region)
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(CONFIG.NTFY_KEEP)
+      .forEach((r) => {
+        delete state[r.id];
+        changed.push(r.id);
+      });
   });
   // 경찰관 브라우저가 이 내용을 그대로 ntfy.sh 에 보낸다. 환자 상태 문구는 담지 않는다.
   return Object.assign({}, req, { ntfy: ntfyMessage_(req) });
