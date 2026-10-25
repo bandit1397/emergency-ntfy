@@ -39,5 +39,7 @@
 ## 남은 일 (2026-10-25 기준)
 
 - `ACCESS_CODE` 미설정 → 사용자에게 설정 요청함
-- 시험 휴대폰: 웹앱 병원 이름이 `SNU-test` → 실제 이름으로 변경, ntfy 의 옛 시험 구독(`par-7bb00d-…`, `par-linktest-zz9`) 정리
+- 시험 휴대폰: 웹앱 병원 이름이 `SNU-test` → 실제 이름으로 변경
+- (완료 2026-10-25) ntfy 옛 시험 구독 삭제 → 남은 구독은 `par-4jypj546izg5tb57-1`(서울) 하나,
+  ntfy 배터리 최적화 해제 (`adb shell dumpsys deviceidle whitelist +io.heckel.ntfy`)
 - 시험 끝나면 휴대폰 USB 디버깅 끄기
