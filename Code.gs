@@ -133,7 +133,8 @@ function ntfyMessage_(req) {
   const msg = {
     topic: ntfyTopic_(req.region),
     title: `수용 요청 — ${req.region} · ${req.type}`, // 🚨 는 tags 로 앞에 붙는다
-    message: `요청 ${req.id}. 눌러서 앱을 열고 수용 가능/불가를 눌러 주세요.`,
+    // ntfy 의 '계속 울리기'는 알림 본문을 눌러야 멈춘다 (버튼·밀어서 지우기로는 안 멈춤, 2026-10-25 확인).
+    message: `요청 ${req.id}. 이 알림을 누르면 알람이 멈춥니다. 이어서 메시지를 누르면 앱이 열립니다.`,
     priority: 5,
     tags: ['rotating_light'],
   };
