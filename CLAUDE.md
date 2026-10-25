@@ -11,7 +11,7 @@
 | 웹앱 (/exec, 버전이 바뀌어도 같은 주소) | https://script.google.com/macros/s/AKfycbz-AdqsI0QU7ExhjOUC4_ULq8Das9895_s19KK65fi9wDRY7jpSte-YJr-u-ykqiJgvZg/exec |
 | 파일 | `Code.gs`(서버) · `Index.html`(화면) · `appsscript.json` · `README.md`(사용자 안내) · `docs/qr-*.svg` |
 
-- 스크립트 속성: `ACCESS_CODE`(사용자가 설정, 저장소에 쓰지 말 것) · `NTFY_PREFIX`(서버가 자동 생성한 토픽 접두어) · `WEBAPP_URL`(자동 저장)
+- 스크립트 속성: `ACCESS_CODE`(사용자가 설정, 저장소에 쓰지 말 것) · `NTFY_PREFIX`(서버가 자동 생성한 토픽 접두어) · `WEBAPP_URL`(자동 저장) · `NTFY_SLOT_1..4`(최근 3개 남기기용 칸 번호, 자동)
 - 토픽 = `NTFY_PREFIX` + `-1..4` (CONFIG.REGIONS 순서: 서울 · 인천 · 경기 · 기타)
 
 ## 알림 흐름
@@ -47,6 +47,9 @@
   실제로 웹앱 요청 알림을 눌러도 안 멈췄고, ntfy 앱 → 구독한 주제를 눌러야 멈춤 (A90 · 노트 FE 둘 다)
 - 해결: `click` 제거, 웹앱 주소는 본문 `앱 열기: <url>` 로 → 노트 FE 에서 알림을 누르니 토픽 화면이 열리며 알람 멈춤,
   그 화면의 링크를 누르니 웹앱 열림 (임시 토픽으로 확인)
+- 최근 3개만 남기기: 알림에 `sequence_id` = 지역별 `slot-1..3` 을 돌려 씀 (스크립트 속성 `NTFY_SLOT_<지역번호>`).
+  ntfy 앱은 같은 sequence_id 의 새 알림이 오면 이전 것을 지움 (새 알림은 그대로 울림). 노트 FE 에서 4개 보내 3개 남음 확인.
+  이 기능 이전에 쌓인 알림은 그대로 남음 (앱에서 직접 지우거나 1달 뒤 자동 삭제)
 - ntfy.sh → 휴대폰 FCM 전달이 가끔 수십 초~몇 분 늦을 때가 있었음 (시험 알림을 많이 보낸 뒤)
 
 ### 두 번째 시험 휴대폰: 갤럭시 노트 FE (SM-N935S · 안드로이드 9 · ntfy 1.25.2), 2026-10-25

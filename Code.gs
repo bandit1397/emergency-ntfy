@@ -16,6 +16,7 @@ const CONFIG = {
   // 화면이 꺼져도 오는 알림: ntfy 앱 (무료, 회원가입 없음). Apps Script 서버는 ntfy.sh 에 접속할 수 없어
   // 경찰관 브라우저가 직접 보낸다. 토픽 이름은 스크립트 속성 NTFY_PREFIX 에 무작위로 만들어 저장한다.
   NTFY_SERVER: 'https://ntfy.sh',
+  NTFY_KEEP: 3, // ntfy 앱에 남길 최근 요청 알림 수 (지역별). 더 오래된 알림은 앱에서 자동으로 지워진다.
 };
 
 const CACHE_KEY = 'state_v1';
@@ -24,6 +25,7 @@ const PREFIX = 'req_';
 const CACHE_SEC = 21600; // CacheService 최대 보관 시간(6시간)
 const APP_URL_KEY = 'WEBAPP_URL';
 const NTFY_PREFIX_KEY = 'NTFY_PREFIX';
+const NTFY_SLOT_KEY = 'NTFY_SLOT_'; // + 지역 번호: 다음에 쓸 sequence_id 칸
 
 function doGet() {
   rememberAppUrl_();
@@ -138,8 +140,28 @@ function ntfyMessage_(req) {
     message: `요청 ${req.id}. 이 알림을 누르면 알람이 멈춥니다.` + (url ? `\n앱 열기: ${url}` : ''),
     priority: 5,
     tags: ['rotating_light'],
+    sequence_id: ntfySlot_(req.region),
   };
   return { server: CONFIG.NTFY_SERVER, body: msg };
+}
+
+/**
+ * 지역별로 'slot-1' → 'slot-2' → 'slot-3' → 'slot-1' … 을 돌려 쓴다.
+ * ntfy 앱은 같은 sequence_id 의 새 알림이 오면 이전 알림을 지우므로 최근 NTFY_KEEP 개만 남는다.
+ * (새 알림은 그대로 표시되고 알람도 울린다. ntfy-android Repository.addNotification)
+ */
+function ntfySlot_(region) {
+  const key = NTFY_SLOT_KEY + (CONFIG.REGIONS.indexOf(region) + 1);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const n = Number(props.getProperty(key)) || 0;
+    props.setProperty(key, String((n + 1) % CONFIG.NTFY_KEEP));
+    return 'slot-' + (n + 1);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /**
