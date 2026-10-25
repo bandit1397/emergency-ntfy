@@ -137,7 +137,7 @@ function ntfyMessage_(req) {
     title: `수용 요청 — ${req.region} · ${req.type}`, // 🚨 는 tags 로 앞에 붙는다
     // ntfy 의 '계속 울리기'는 ntfy 의 토픽 화면이 열릴 때 멈춘다. click 을 넣으면 알림을 눌러도 웹앱만 열리고
     // 계속 울리므로(2026-10-25 확인) click 은 넣지 않고, 웹앱 주소는 본문에 둔다 (ntfy 화면에서 링크로 눌림).
-    message: `요청 ${req.id}. 이 알림을 누르면 알람이 멈춥니다.` + (url ? `\n앱 열기: ${url}` : ''),
+    message: `요청 ${req.id}. 이 알림을 누르면 알람이 멈춥니다.` + (url ? `\n앱 열기: ${url}?from=ntfy` : ''),
     priority: 5,
     tags: ['rotating_light'],
     sequence_id: ntfySlot_(req.region),
