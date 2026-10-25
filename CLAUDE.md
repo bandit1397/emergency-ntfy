@@ -16,7 +16,7 @@
 
 ## 알림 흐름
 
-1. 경찰관 `createRequest` → 서버가 `ntfy` 내용(topic, title, message, priority 5, tags, click)을 돌려줌
+1. 경찰관 `createRequest` → 서버가 `ntfy` 내용(topic, title, message(앱 열기 링크 포함), priority 5, tags, sequence_id — click 없음)을 돌려줌
 2. **경찰관 브라우저가** `https://ntfy.sh/` 로 JSON 을 `Content-Type: text/plain` 으로 POST (사전 확인 없음, CORS 허용).
    Apps Script 서버(UrlFetchApp)는 ntfy.sh 에 접속할 수 없음 (Google 차단, 이전 프로젝트에서 확인)
 3. 병원 화면 `ntfyTopics(code, regions)` → `ntfy://ntfy.sh/<topic>` 구독 버튼 (누르면 ntfy 앱에서 바로 구독됨)
