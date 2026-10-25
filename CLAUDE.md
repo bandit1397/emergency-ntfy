@@ -49,6 +49,6 @@
 - 위 정리 후 화면 꺼짐 상태에서 시험 알림 → 한글 제목 · 본문 정상 표시, `USAGE_ALARM` 으로 울림
 - 알람음을 사이렌으로 변경 → 시험 알림에서 사이렌으로 울림 확인 (사용자가 "잘 울려요"라고 확인)
   - ntfy 의 '계속 울리기' 소리 = **"우선순위 최상"(`ntfy-max`) 알림 채널의 소리** (ntfy-android `NotificationService.getInsistentSound`)
-  - 파이썬으로 직접 만든 사이렌 `siren_wail.ogg`("Emergency Siren (wail)") · `siren_yelp.ogg`("Emergency Bell (fast)") 를
+  - 파이썬으로 직접 만든 사이렌 (`docs/sounds/`, 만드는 스크립트 `make_sirens.py`, README 에 설정 방법) `siren_wail.ogg`("Emergency Siren (wail)") · `siren_yelp.ogg`("Emergency Bell (fast)") 를
     휴대폰 `/sdcard/Notifications/` 에 넣음 → `ntfy-max` 채널 소리 = Emergency Siren (wail)
   - 채널 설정 바로 열기: `adb shell am start -a android.settings.CHANNEL_NOTIFICATION_SETTINGS --es android.provider.extra.APP_PACKAGE io.heckel.ntfy --es android.provider.extra.CHANNEL_ID ntfy-max`
