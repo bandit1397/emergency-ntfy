@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>병원 휴대폰 설정 절차</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  body { font-family: "Malgun Gothic", "맑은 고딕", sans-serif; font-size: 10.5pt; line-height: 1.6; color: #1d2330; }
+  h1 { font-size: 20pt; margin: 0 0 4px; }
+  h2 { font-size: 14pt; margin: 22px 0 8px; padding: 6px 10px; background: #fdecea; border-left: 5px solid #c62828; break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 14px 0 6px; break-after: avoid; }
+  p { margin: 4px 0; }
+  ol, ul { margin: 4px 0 6px; padding-left: 22px; }
+  li { margin: 2px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.8pt; break-inside: avoid; }
+  th, td { border: 1px solid #c9ced6; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #f1f3f6; }
+  code { font-family: Consolas, monospace; font-size: 9.3pt; background: #f1f3f6; padding: 0 3px; border-radius: 3px; word-break: break-all; }
+  .sub { color: #5d6675; margin-bottom: 10px; }
+  .warn { border: 1px solid #e0a800; background: #fff8e1; padding: 8px 10px; border-radius: 6px; margin: 8px 0; break-inside: avoid; }
+  .note { border: 1px solid #c9ced6; background: #f7f8fa; padding: 8px 10px; border-radius: 6px; margin: 8px 0; break-inside: avoid; }
+  .toc { columns: 2; border: 1px solid #c9ced6; padding: 8px 10px 8px 28px; border-radius: 6px; }
+  .page-break { break-before: page; }
+  .flow { font-family: Consolas, "Malgun Gothic", monospace; font-size: 9pt; background: #f7f8fa; padding: 8px; border-radius: 6px; white-space: pre; }
+  .box { display:inline-block; width:12px; height:12px; border:1.5px solid #333; margin-right:6px; vertical-align:-1px; }
+</style>
+</head>
+<body>
+
+<h1>🚑 환자 수용 요청 · 병원 휴대폰 설정 절차</h1>
+<p class="sub">Emergency ntfy — ntfy 복원 파일을 이용한 빠른 설정 (관리자 PC 약 5분 + 병원 휴대폰 1대당 약 3분) · 2026-11-14 작성</p>
+
+<ol class="toc">
+  <li>전체 흐름 한눈에 보기</li>
+  <li>관리자: 토픽 이름 찾기</li>
+  <li>관리자: 복원 파일 만들기</li>
+  <li>관리자: 휴대폰으로 파일 보내기</li>
+  <li>병원 휴대폰: 기본 설정</li>
+  <li>병원 휴대폰: ntfy 설치와 복원</li>
+  <li>병원 휴대폰: 웹앱 병원 등록</li>
+  <li>(권장) 알람음을 사이렌으로</li>
+  <li>시험 (꼭 한 번)</li>
+  <li>알람 끄는 방법</li>
+  <li>매일 점검 · 문제 해결</li>
+  <li>주의사항</li>
+</ol>
+
+<h2>1. 전체 흐름 한눈에 보기</h2>
+<div class="flow">[관리자 PC]  웹앱에서 토픽 이름 복사 → make-ntfy-restore.html 로 복원 파일(.json) 만들기 → 휴대폰으로 보내기
+[병원 휴대폰] ntfy 설치 → 배터리 허용 → 파일에서 복원 → 웹앱 병원 등록 → (사이렌) → 시험</div>
+
+<table>
+  <tr><th style="width:38%">설정 항목</th><th>예전 (하나씩 손으로)</th><th>복원 파일 사용</th></tr>
+  <tr><td>지역별 알림 구독</td><td>구독 버튼 / 토픽 직접 입력</td><td>✅ 자동</td></tr>
+  <tr><td>계속 울리기 (누를 때까지)</td><td>설정 → Keep alerting</td><td>✅ 자동 (구독마다 켜짐)</td></tr>
+  <tr><td>즉시 전달 (지연 없음)</td><td>구독마다 구독 설정 → 즉시 전달</td><td>✅ 자동</td></tr>
+  <tr><td>배터리 최적화 해제</td><td>설정 메뉴에서</td><td>✋ 버튼 한 번</td></tr>
+  <tr><td>웹앱 병원 등록</td><td>직접</td><td>✋ 직접 (같음)</td></tr>
+  <tr><td>사이렌 소리 · 저장공간 권한</td><td>직접</td><td>✋ 선택 (기본 소리면 생략 가능)</td></tr>
+</table>
+<p>안드로이드는 다른 앱이 ntfy 의 설정·권한을 대신 바꾸지 못하게 막아 두었기 때문에, ✋ 표시는 사람이 직접 눌러야 합니다.</p>
+
+<h2>2. 관리자: 토픽 이름 찾기 (둘 중 하나)</h2>
+<h3>방법 A — 웹앱 병원 화면에서 (추천)</h3>
+<ol>
+  <li>PC 에서 Chrome 을 열고 웹앱 주소를 엽니다.<br>
+    <code>https://script.google.com/macros/s/AKfycbz-AdqsI0QU7ExhjOUC4_ULq8Das9895_s19KK65fi9wDRY7jpSte-YJr-u-ykqiJgvZg/exec</code></li>
+  <li><b>🏥 병원</b> 선택 → 병원명은 아무거나(예: <code>관리자PC</code>) · <b>지역</b> 선택 · <b>접속 코드</b> 입력 → <b>시작하기</b></li>
+  <li>위쪽 <b>📱 화면이 꺼져도 알림 받기</b> 상자 맨 아래 줄을 봅니다: <code>토픽: 서울 = par-xxxxxxxxxxxxxxxx-1</code></li>
+  <li><code>=</code> 뒤의 <code>par-…-1</code> 부분만 마우스로 끌어 선택 → <b>Ctrl+C</b></li>
+</ol>
+<div class="note">상자가 안 보이면 이 브라우저에서 예전에 <b>확인 — 이 안내 숨기기</b>를 누른 것입니다.
+  <b>Ctrl+Shift+N</b> (시크릿 창)으로 다시 열거나 방법 B 를 쓰세요.</div>
+
+<h3>방법 B — Apps Script 편집기에서</h3>
+<ol>
+  <li>Apps Script 프로젝트 <b>Emergency ntfy</b> 열기</li>
+  <li>왼쪽 <b>⚙ 프로젝트 설정</b> → 아래 <b>스크립트 속성</b> → <code>NTFY_PREFIX</code> 값 복사</li>
+  <li>값 뒤에 <b><code>-1</code></b> 을 붙입니다. 예: <code>par-xxxxxxxxxxxxxxxx-1</code></li>
+</ol>
+<p>지역 번호: <b>서울 -1 · 인천 -2 · 경기 -3 · 기타 -4</b>. 도구에는 어느 지역 토픽을 넣어도 됩니다 (지역은 다음 단계에서 고름).</p>
+
+<h2>3. 관리자: 복원 파일 만들기</h2>
+<ol>
+  <li>파일 탐색기에서 <code>Desktop\emergency-ntfy\phone-setup\</code> 폴더를 엽니다.</li>
+  <li><b>make-ntfy-restore.html</b> 을 더블클릭 → 브라우저에 <b>🔔 ntfy 복원 파일 만들기</b> 화면이 열립니다.<br>
+    (메모장 등으로 열리면: 오른쪽 클릭 → 연결 프로그램 → Chrome)</li>
+  <li><b>토픽 이름</b> 칸 클릭 → <b>Ctrl+V</b> (<code>ntfy://ntfy.sh/par-…-1</code> 처럼 주소째 넣어도 됨)</li>
+  <li><b>받을 지역</b>을 체크합니다 (기본은 서울만 체크, 여러 개 가능).</li>
+  <li><b>복원 파일 만들기 (다운로드)</b> 클릭</li>
+  <li>초록색 <code>✅ ntfy-병원설정-서울.json 다운로드됨</code> 이 나오면 성공 → PC 의 <b>다운로드</b> 폴더에 저장됨<br>
+    빨간 "형식이 맞지 않습니다" 가 나오면 <code>par-…-숫자</code> 만 다시 복사해서 붙여넣기</li>
+  <li>(확인) <b>파일 내용 미리 보기</b>를 열면 지역마다 <code>"instant": true</code>, <code>"insistent": 1</code> 이 있어야 합니다.</li>
+</ol>
+<p>이 도구는 인터넷 없이 PC 안에서만 동작하며, 입력한 토픽을 어디에도 보내지 않습니다.</p>
+
+<h2>4. 관리자: 휴대폰으로 파일 보내기</h2>
+<table>
+  <tr><th style="width:24%">방법</th><th>절차</th></tr>
+  <tr><td>카카오톡 PC</td><td>나와의 채팅에 파일을 끌어다 놓기 → 휴대폰 카카오톡에서 파일 누르기 → <b>저장</b></td></tr>
+  <tr><td>이메일</td><td>나에게 첨부해서 보내기 → 휴대폰에서 첨부파일 <b>다운로드</b></td></tr>
+  <tr><td>USB 케이블</td><td>휴대폰을 PC 에 연결 → 휴대폰 <code>Download</code> 폴더에 복사</td></tr>
+</table>
+<p>어느 방법이든 휴대폰의 <b>다운로드(Download)</b> 폴더에 들어가면 됩니다. 같은 지역 병원이라면 파일 하나를 여러 휴대폰에 그대로 써도 됩니다.</p>
+<div class="warn">⚠️ 이 파일에는 <b>토픽 이름</b>이 들어 있습니다. 토픽을 아는 사람은 누구나 알림을 받을 수 있으니
+  <b>병원에만 전달</b>하고, 단체방 · GitHub 등 공개된 곳에 올리지 마세요.</div>
+
+<h2 class="page-break">5. 병원 휴대폰: 기본 설정</h2>
+<p>안드로이드 휴대폰 기준 (갤럭시 A90 · 안드로이드 12, 갤럭시 노트 FE · 안드로이드 9 에서 확인). 메뉴 이름은 기종마다 조금 다를 수 있습니다.
+  아이폰은 "계속 울리기"가 안 되므로 쓰지 않습니다.</p>
+<table>
+  <tr><th style="width:18%">항목</th><th style="width:30%">위치</th><th style="width:22%">설정</th><th>이유</th></tr>
+  <tr><td>인터넷</td><td>화면 위를 내려서 빠른 설정</td><td><b>Wi-Fi 또는 데이터 항상 켜기</b></td><td>꺼져 있으면 알림이 아예 안 옴</td></tr>
+  <tr><td>알람 음량</td><td>설정 → 소리 및 진동 → 음량 → <b>알람</b></td><td><b>중간 이상</b> (0 안 됨)</td><td>ntfy 는 알람 음량으로 울림</td></tr>
+  <tr><td>무음 · 진동</td><td>—</td><td>상관없음</td><td>알람 음량으로 울리므로 소리 남</td></tr>
+  <tr><td>방해 금지</td><td>설정 → 알림 → 방해 금지</td><td>안 쓰거나 <b>알람 허용</b></td><td>알람까지 막으면 안 울림</td></tr>
+  <tr><td>충전</td><td>—</td><td>가능하면 <b>충전기에 꽂아 두기</b></td><td>즉시 전달은 배터리를 조금 더 씀</td></tr>
+</table>
+
+<h2>6. 병원 휴대폰: ntfy 설치와 복원</h2>
+<ol>
+  <li>Play 스토어에서 <b>ntfy</b> 설치 (무료, 회원가입 없음) → 한 번 열기 → <b>알림 허용</b>을 물으면 <b>허용</b></li>
+  <li>ntfy 위쪽 <b>배터리 최적화</b> 안내 → <b>지금 수정하기 → 허용</b><br>
+    안내가 없으면: 설정 → 애플리케이션 → ntfy → 배터리 → <b>제한 없음</b>(또는 최적화하지 않음)<br>
+    삼성 일부 기종: 설정 → 배터리 → 백그라운드 사용 제한 → <b>절전 예외 앱</b>에 ntfy 추가</li>
+  <li>받은 <code>ntfy-병원설정-….json</code> 을 휴대폰 <b>다운로드</b> 폴더에 저장 (4번 참고)</li>
+  <li>ntfy 오른쪽 위 <b>⋮ → 설정</b> → 맨 아래 <b>백업 및 복원</b> → <b>파일에서 복원</b></li>
+  <li>파일 선택 화면에서 <b>다운로드</b> → 받은 파일 선택 (안 보이면 왼쪽 메뉴 ☰ → 다운로드 / 내 파일)</li>
+  <li>"복원 성공" 안내 후 첫 화면에 <b>🚑 서울 환자 수용 요청</b> 같은 구독이 보이면 완료</li>
+  <li>알림창을 내려 ntfy <b>"알림 수신중 · 즉시 전달 주제 n개 구독중"</b> 알림 확인 (없으면 ntfy 를 닫았다 다시 열기)</li>
+</ol>
+<div class="note">이미 같은 토픽을 구독한 휴대폰에서는 그 토픽이 복원되지 않고 건너뜁니다 (기존 시험 휴대폰 A90 · 노트 FE).
+  복원 파일 설정으로 맞추려면 ntfy 에서 그 구독을 <b>길게 눌러 삭제</b>한 뒤 다시 복원하세요.</div>
+
+<h2>7. 병원 휴대폰: 웹앱 병원 등록</h2>
+<ol>
+  <li>웹앱 링크를 <b>휴대폰의 기본 브라우저</b>(삼성 인터넷 또는 Chrome)로 엽니다.<br>
+    병원명 · 접속 코드는 브라우저마다 따로 저장되므로, ntfy 버튼이 여는 브라우저와 같아야 매번 다시 입력하지 않습니다.</li>
+  <li><b>🏥 병원</b> → <b>병원명</b> · <b>요청을 받을 지역</b> · <b>접속 코드</b> → <b>시작하기</b></li>
+  <li>첫 화면을 한 번 <b>터치</b> (그래야 웹앱 소리가 납니다)</li>
+  <li><b>구독 버튼은 누르지 않아도 됩니다</b> (이미 복원됨) → <b>확인 — 이 안내 숨기기</b></li>
+  <li>브라우저 메뉴 → <b>홈 화면에 추가</b></li>
+</ol>
+
+<h2>8. (권장) 알람음을 사이렌으로</h2>
+<p>복원 파일은 알림 소리를 바꾸지 못하므로, 새로 설치한 휴대폰은 <b>기본 소리</b>로 울립니다. 아래 순서로 사이렌으로 바꿉니다 (약 3분).
+  ntfy 의 계속 울리는 소리는 ntfy 알림 종류 중 <b>"우선순위 최상"</b>의 소리를 씁니다. 이것만 바꾸면 되고 다른 앱 소리는 그대로입니다.</p>
+
+<h3>8-1. 사이렌 파일 받기</h3>
+<p>병원 휴대폰 브라우저에서 아래 주소를 엽니다 → <b>다운로드</b> 폴더에 저장됩니다.</p>
+<table>
+  <tr><th style="width:26%">소리</th><th>다운로드 주소</th></tr>
+  <tr><td>천천히 오르내림<br>(시험 휴대폰에 사용)</td><td><code>https://github.com/bandit1397/emergency-ntfy/raw/main/docs/sounds/siren_wail.ogg</code></td></tr>
+  <tr><td>빠른 삐용삐용</td><td><code>https://github.com/bandit1397/emergency-ntfy/raw/main/docs/sounds/siren_yelp.ogg</code></td></tr>
+</table>
+
+<h3>8-2. 알림 소리 폴더로 옮기기 (소리 목록에 바로 나오게)</h3>
+<ol>
+  <li><b>내 파일</b> 앱 → <b>다운로드</b></li>
+  <li><code>siren_wail.ogg</code> 를 길게 누르기 → <b>이동</b></li>
+  <li><b>내장 메모리</b> → <b>Notifications</b> 폴더 → <b>여기로 이동</b></li>
+</ol>
+
+<h3>8-3. ntfy "우선순위 최상" 소리 바꾸기</h3>
+<ol>
+  <li>설정 → 애플리케이션 → ntfy → <b>알림</b></li>
+  <li><b>우선순위 최상</b>(Max priority) → <b>소리</b></li>
+  <li>목록에서 <b>siren_wail</b> 선택 → <b>뒤로 가기</b> (저장됨)<br>
+    목록에 없으면 <b>＋ / 직접 설정</b>에서 파일을 직접 선택</li>
+</ol>
+<div class="note"><b>우선순위 최상</b> 항목이 없으면 아직 최고 우선순위 알림을 한 번도 받지 않은 것입니다 → 시험 요청을 한 번 보낸 뒤 다시 보세요.</div>
+
+<h3>8-4. 저장공간 권한 허용 (꼭)</h3>
+<ol>
+  <li>설정 → 애플리케이션 → ntfy → <b>권한</b></li>
+  <li><b>저장공간</b> → <b>허용</b> (안드로이드 13 이상은 <b>음악 및 오디오</b> → 허용)</li>
+</ol>
+<div class="warn">⚠️ 이 권한이 없으면 사이렌이 <b>한 번만</b> 울리고 계속 울리지 않습니다 (갤럭시 노트 FE 에서 확인).
+  그럴 땐 권한을 허용하거나 소리를 기본 알림 소리로 되돌리세요.</div>
+
+<h3>8-5. 시험</h3>
+<p>화면을 끈 상태에서 경찰관 화면으로 시험 요청 → 사이렌이 <b>누를 때까지 계속</b> 울리면 성공 (9번 시험과 함께 해도 됩니다).</p>
+
+<h3>참고 — PC 에 USB 로 연결해서 할 때</h3>
+<div class="flow">adb push docs/sounds/siren_wail.ogg /sdcard/Notifications/
+adb shell pm grant io.heckel.ntfy android.permission.READ_EXTERNAL_STORAGE
+adb shell am start -a android.settings.CHANNEL_NOTIFICATION_SETTINGS --es android.provider.extra.APP_PACKAGE io.heckel.ntfy \
+   --es android.provider.extra.CHANNEL_ID ntfy-max</div>
+<p>마지막 명령은 8-3 의 소리 설정 화면을 바로 엽니다 → siren_wail 선택. 두 번째 명령(권한)은 안드로이드 12 이하용이며,
+  13 이상은 8-4 처럼 휴대폰에서 <b>음악 및 오디오</b>를 허용하세요.</p>
+
+<h2 class="page-break">9. 시험 (설정 후 꼭 한 번)</h2>
+<ol>
+  <li>병원 휴대폰 <b>화면을 끕니다</b> (무음 모드여도 됨)</li>
+  <li>경찰관 화면(다른 휴대폰 또는 PC)에서 그 지역으로 <b>요청 보내기</b> — 환자 상태에 "시험"이라고 적기</li>
+  <li><b>몇 초 안에</b> 알람이 울리면 성공 (사이렌을 설정했다면 사이렌)</li>
+  <li>잠금을 풀고 <b>알림 본문</b>을 누름 → 알람이 <b>멈추고</b> ntfy 화면이 열리는지</li>
+  <li>ntfy 화면의 <b>환자 수용 요청 열기</b> → 웹앱이 <b>병원 화면 그대로</b> 열리는지</li>
+  <li><b>수용 불가</b> 또는 <b>전화 확인</b>으로 응답 → 경찰관 화면에 보이는지 → 경찰관 화면에서 <b>요청 취소</b></li>
+</ol>
+<table>
+  <tr><th style="width:36%">시험 결과</th><th>원인 · 조치</th></tr>
+  <tr><td>알림이 아예 안 옴</td><td>ntfy 에 구독이 있는지 (6) · 인터넷 켜짐 (5) · "알림 수신중" 알림 있는지</td></tr>
+  <tr><td>1~수 분 늦게 옴</td><td>구독 → ⋮ → 구독 설정 → <b>즉시 전달</b> 켜져 있는지</td></tr>
+  <tr><td>소리 없음 · 한 번만 울림</td><td><b>알람 음량</b> (5) · 구독 설정의 계속 울리기 · 사이렌이면 <b>저장공간 권한</b> (8)</td></tr>
+  <tr><td>알림을 눌러도 안 멈춤</td><td>ntfy 화면을 열어 둔 채 잠갔던 경우 → 10번 참고</td></tr>
+  <tr><td>웹앱이 설정 화면부터 나옴</td><td>다른 브라우저로 열림 → 기본 브라우저에서 다시 등록 (7-1)</td></tr>
+  <tr><td>복원했는데 구독이 안 생김</td><td>같은 토픽이 이미 있음 → 구독 삭제 후 다시 복원 (6)</td></tr>
+  <tr><td>"복원 실패"</td><td>3번에서 만든 .json 파일이 맞는지, 전송 중 이름·내용이 바뀌지 않았는지</td></tr>
+</table>
+
+<h2>10. 🔕 알람 끄는 방법</h2>
+<table>
+  <tr><th style="width:52%">방법</th><th>소리</th></tr>
+  <tr><td><b>알림 본문 누르기</b></td><td>✅ 멈춤 (ntfy 화면이 열림)</td></tr>
+  <tr><td>ntfy 앱 → 구독한 주제 누르기</td><td>✅ 멈춤</td></tr>
+  <tr><td>웹앱의 빨간 <b>응답 대기 중인 요청</b> 배너</td><td>✅ 멈춤 (ntfy 화면 잠깐 열림 → 뒤로 가기)</td></tr>
+  <tr><td>웹앱의 <b>수용 가능 / 불가 / 전화 확인</b></td><td>✅ 응답 후 멈춤 (ntfy 화면 잠깐 열림 → 뒤로 가기)</td></tr>
+  <tr><td>알림을 옆으로 밀어 지우기</td><td>❌ 안 멈출 수 있음</td></tr>
+  <tr><td>알림의 <b>환자 수용 요청 열기</b> 버튼</td><td>❌ 웹앱만 열림 → 웹앱 빨간 배너로 끄기</td></tr>
+  <tr><td>그래도 안 멈출 때</td><td>설정 → 애플리케이션 → ntfy → <b>강제 중지</b> → <b>ntfy 다시 열기</b> (안 열면 다음 알림을 못 받음)</td></tr>
+</table>
+<div class="warn"><b>ntfy 화면을 열어 둔 채로 휴대폰을 잠그지 마세요.</b> 그 상태에서 다음 알람이 오면 잠금을 풀 때 알림만 지워지고
+  알람은 계속 울립니다. 이때는 ntfy 에서 뒤로 가기 → 구독한 주제를 다시 누르거나 웹앱 배너를 누르세요.</div>
+
+<h2>11. ✅ 매일 점검 (근무 시작 때 10초)</h2>
+<p><span class="box"></span>휴대폰 <b>충전 중</b> · <b>Wi-Fi(또는 데이터) 켜짐</b></p>
+<p><span class="box"></span>알림창에 ntfy <b>"알림 수신중"</b> 알림이 있음 (<b>"Waiting for network"</b> 이면 인터넷 끊김)</p>
+<p><span class="box"></span><b>알람 음량</b>이 0 이 아님</p>
+<p><span class="box"></span>ntfy 화면이 맨 앞에 열려 있지 않음 (홈 화면이나 웹앱으로 두기)</p>
+
+<h2>12. 주의사항</h2>
+<ul>
+  <li>복원 파일(.json)과 토픽 이름은 <b>공개된 곳에 올리지 않습니다</b>. 유출이 의심되면 스크립트 속성 <code>NTFY_PREFIX</code> 를 지우면
+    다음 요청 때 새 이름이 만들어지고, 병원은 새 복원 파일로 다시 설정해야 합니다.</li>
+  <li>ntfy 알림은 요청을 보낼 때 <b>1번</b> 갑니다 (대신 누를 때까지 계속 울림). 재알림은 없습니다.</li>
+  <li>ntfy.sh 공용 무료 서버에 의존합니다. 서버 장애 시 화면 꺼짐 알림이 멈출 수 있는 <b>시험 운영</b>용입니다.</li>
+  <li><b>실제 환자 개인정보(이름, 주민등록번호 등)는 입력하지 마세요.</b> 실제 업무 적용 전 소속 기관의 승인과 개인정보 보호 검토가 필요합니다.</li>
+  <li>복원 파일 방식은 ntfy 1.25.2 소스로 확인했지만 <b>실제 휴대폰에서는 아직 시험 전</b>입니다. 첫 휴대폰에서 9번 시험을 꼭 해 주세요.</li>
+</ul>
+
+</body>
+</html>

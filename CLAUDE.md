@@ -10,6 +10,7 @@
 | Apps Script 프로젝트 "Emergency ntfy" | https://script.google.com/home/projects/1z6TcYcGqn4NmBVj3YbfTUzIyWQKtyG9zpFFMy1VVRwcRBAHsweiib3wA/edit |
 | 웹앱 (/exec, 버전이 바뀌어도 같은 주소) | https://script.google.com/macros/s/AKfycbz-AdqsI0QU7ExhjOUC4_ULq8Das9895_s19KK65fi9wDRY7jpSte-YJr-u-ykqiJgvZg/exec |
 | 파일 | `Code.gs`(서버) · `Index.html`(화면) · `appsscript.json` · `README.md`(사용자 안내) · `docs/qr-*.svg` |
+| 휴대폰 빠른 설정 (웹앱과 별개) | `phone-setup/` — 아래 **phone-setup** 참고 |
 
 - 스크립트 속성: `ACCESS_CODE`(사용자가 설정, 저장소에 쓰지 말 것) · `NTFY_PREFIX`(서버가 자동 생성한 토픽 접두어) · `WEBAPP_URL`(자동 저장) · `NTFY_SLOT_1..4`(최근 3개 남기기용 칸 번호, 자동)
 - 토픽 = `NTFY_PREFIX` + `-1..4` (CONFIG.REGIONS 순서: 서울 · 인천 · 경기 · 기타)
@@ -35,6 +36,31 @@
 2. Apps Script 편집기 Code.gs / Index.html 에 반영 후 **저장** (편집기가 이전 커밋과 같은지 먼저 확인하고 덮어쓰기)
 3. **배포 → 배포 관리 → 수정(연필) → 버전: 새 버전 → 배포** 는 사용자가 직접 함 (같은 /exec 주소 유지)
 4. PC 에서 시험 알림을 보낼 때 한글은 **UTF-8 파일/파이썬으로** 보낼 것 (Git Bash 인자로 넣으면 한글이 깨짐)
+
+## phone-setup (2026-11-14 추가)
+
+병원 휴대폰 ntfy 설정을 **ntfy 백업 파일 복원** 한 번으로 줄이는 도구. 웹앱(`Code.gs` · `Index.html`)은 건드리지 않음.
+
+| 파일 | 내용 |
+|---|---|
+| `make-ntfy-restore.html` | PC 에서 더블클릭. 토픽 이름(`par-…-N`, 주소째도 됨) + 지역 체크 → `ntfy-병원설정-<지역>.json` 다운로드. 오프라인, 외부 전송 없음 |
+| `README.md` | 관리자(파일 만들기) · 병원 휴대폰(설치 → 배터리 → 파일에서 복원 → 웹앱 등록) 순서 |
+| `병원휴대폰-설정-절차.pdf` | 전체 절차 A4 6쪽 (1 흐름 · 2 토픽 찾기 · 3 파일 만들기 · 4 보내기 · 5 기본 설정 · 6 복원 · 7 웹앱 등록 · 8 사이렌 · 9 시험 · 10 알람 끄기 · 11 매일 점검 · 12 주의) |
+| `pdf-source.html` | 위 PDF 의 원본. 고친 뒤 Chrome 으로 다시 만들기 (아래) |
+| `.gitignore` | `*.json` — 복원 파일에는 토픽 이름이 들어 있으므로 **공개 저장소에 올리지 않음** |
+
+- 백업 형식 (ntfy-android v1.25.2 `backup/Backuper.kt` 확인): `magic: "ntfy2586"`(이것만 검사) · `version: 1` ·
+  `settings: null`(앱 전체 설정은 안 바꿈) · `subscriptions[]` 에 `baseUrl https://ntfy.sh` · `topic` · **`instant: true`** · **`insistent: 1`** ·
+  `dedicatedChannels: false`(→ `ntfy-max` 채널 소리 = 사이렌 설정 그대로) · `displayName "🚑 <지역> 환자 수용 요청"` · `id` 는 `Date.now()*10+i`
+- 계속 울리기: `NotificationService.kt` — 우선순위 5 이고 (전체 Keep alerting **또는** 구독 `insistent == 1`) → 전체 설정을 안 켜도 됨
+- **같은 토픽이 이미 구독돼 있으면** Room `@Insert`(ABORT) 실패 → 그 구독만 건너뜀. 기존 휴대폰은 구독 삭제 후 복원
+- 복원 파일로 **안 되는 것**: 배터리 최적화 해제 · 알림 소리(사이렌) · 저장공간 권한 (안드로이드가 다른 앱 설정 변경을 막음) → 사람이 직접 (PDF 8번)
+- 사이렌 (PDF 8번): `…/raw/main/docs/sounds/siren_wail.ogg` 다운로드 → 내 파일로 `Notifications` 폴더에 이동 →
+  ntfy 알림 **우선순위 최상** → 소리 → 저장공간 권한 (안드로이드 13+ 은 "음악 및 오디오")
+- 새로 설치해 시험한 휴대폰: 복원 후 알림은 왔지만 **기본 소리** → 사이렌은 위처럼 따로 설정해야 함 (사용자 확인, 2026-11-14)
+- PDF 다시 만들기 (PowerShell, 출력 경로는 `phone-setup/` 안):
+  `& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --disable-gpu --no-pdf-header-footer "--print-to-pdf=<저장소>\phone-setup\병원휴대폰-설정-절차.pdf" "file:///<저장소>/phone-setup/pdf-source.html"`
+- 이 PC 는 git `user.name/email` 이 설정돼 있지 않음 → 커밋할 때 `git -c user.name=bandit1397 -c user.email=<기존 커밋과 같은 이메일> commit …`
 
 ## 남은 일 (2026-10-25 기준)
 
