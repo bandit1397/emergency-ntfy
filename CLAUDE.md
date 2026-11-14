@@ -62,6 +62,22 @@
   `& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --disable-gpu --no-pdf-header-footer "--print-to-pdf=<저장소>\phone-setup\병원휴대폰-설정-절차.pdf" "file:///<저장소>/phone-setup/pdf-source.html"`
 - 이 PC 는 git `user.name/email` 이 설정돼 있지 않음 → 커밋할 때 `git -c user.name=bandit1397 -c user.email=<기존 커밋과 같은 이메일> commit …`
 
+### 토픽 이름(NTFY_PREFIX) 바꾸기 — PDF 13번 (2026-11-15)
+
+- 링크: 상위 `README.md` 설정 변경 · `phone-setup/README.md` 관리자 항목 → PDF 13번 (마지막 쪽)
+- 왜: 서울 토픽 이름이 CLAUDE.md 에 적혀 공개됐었음 (커밋 `8ba6d78` 부터, `a1bfd51` 에서 지움). 지금 파일엔 없지만 **git 기록에는 남아 있음**
+  → 기록 지우기(강제 push) 대신 `NTFY_PREFIX` 를 바꾸기로 안내. **실제로 바꿨는지는 아직 모름 (사용자가 직접 할 일)**
+- 동작 (`Code.gs` `ntfyTopic_`): 속성이 없으면 `par-` + 16자(`abcdefghijkmnpqrstuvwxyz23456789`)를 만들어 저장.
+  `ntfyTopics`(병원 화면 열기) · `createRequest`(요청) 어느 쪽이든 먼저 부르는 순간 생성 → **코드 수정 · 다시 배포 필요 없음**
+- 절차 요약: ① Apps Script 스크립트 속성에서 `NTFY_PREFIX` 만 삭제 · 저장 (`ACCESS_CODE` · `NTFY_SLOT_*` 는 그대로)
+  ② 시크릿 창으로 웹앱 병원 화면(지역 모두) → 안내 상자 맨 아래 `토픽: 서울 = …` 로 새 이름 확인
+  ③ `make-ntfy-restore.html` 로 새 복원 파일, 옛 .json 모두 삭제
+  ④ 휴대폰마다 ntfy 옛 구독 길게 눌러 삭제 → 파일에서 복원 → **웹앱 새로고침** → 시험
+- 주의: 지운 순간부터 요청은 새 토픽으로만 감 → 옛 구독 휴대폰은 다시 구독할 때까지 못 받음 (요청 적은 시간에 한 번에).
+  웹앱 새로고침이 필요한 이유: 알람 끄기(배너 · 응답 버튼)가 여는 `ntfy://` 주소(`ntfyLinks`)는 화면을 열 때 `registerPush` 에서 받아 둠.
+  옛 구독을 안 지우면 같은 토픽이 아니므로 복원은 되지만, 옛 토픽으로 오는 장난 알림도 울림.
+  사이렌(`ntfy-max` 채널) · 배터리 설정 · 웹앱 병원 등록(localStorage)은 그대로 유지
+
 ## 남은 일 (2026-10-25 기준)
 
 - 시험 끝나면 휴대폰 USB 디버깅 끄기 (A90, 노트 FE 둘 다)
