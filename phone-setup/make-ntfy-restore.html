@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ntfy 복원 파일 만들기</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1d2330; --muted:#5d6675; --line:#d9dde4; --accent:#c62828; --ok:#2e7d32; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#14171c; --card:#1e232b; --text:#e8ebf0; --muted:#a3abb8; --line:#363d48; --accent:#ef5350; --ok:#66bb6a; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 system-ui, "Malgun Gothic", sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0; }
+  label { display:block; font-weight:600; margin:8px 0 4px; }
+  input[type=text] { width:100%; padding:10px; font:inherit; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--text); }
+  .regions label { display:inline-flex; gap:6px; align-items:center; font-weight:400; margin-right:16px; }
+  button { font:inherit; font-weight:700; padding:12px 18px; border:0; border-radius:10px; background:var(--accent); color:#fff; cursor:pointer; width:100%; margin-top:12px; }
+  .muted { color:var(--muted); font-size:.92rem; }
+  .err { color:var(--accent); font-weight:600; }
+  .ok { color:var(--ok); font-weight:600; }
+  pre { white-space:pre-wrap; word-break:break-all; font-size:.8rem; background:var(--bg); padding:10px; border-radius:8px; max-height:260px; overflow:auto; }
+  code { word-break:break-all; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🔔 ntfy 복원 파일 만들기</h1>
+  <p class="muted">병원 휴대폰 ntfy 에 <b>구독 · 즉시 전달 · 계속 울리기</b>를 한 번에 넣는 파일을 만듭니다.
+    이 화면은 인터넷 없이 PC 에서만 동작하며, 입력한 토픽을 어디에도 보내지 않습니다.</p>
+
+  <div class="card">
+    <label for="topic">토픽 이름 (아무 지역 하나)</label>
+    <input id="topic" type="text" placeholder="예: par-xxxxxxxxxxxxxxxx-1" autocomplete="off" spellcheck="false">
+    <p class="muted">웹앱 병원 화면의 <b>📱 화면이 꺼져도 알림 받기</b> 안내 아래쪽에 보이는 <code>par-…-1</code> 같은 이름을 그대로 붙여넣으세요.
+      끝의 <code>-숫자</code>는 지역 번호이므로 어느 지역 것이든 됩니다.</p>
+
+    <label>받을 지역</label>
+    <div class="regions" id="regions"></div>
+
+    <button id="make">복원 파일 만들기 (다운로드)</button>
+    <p id="msg"></p>
+  </div>
+
+  <div class="card">
+    <b>다음 단계</b>
+    <ol class="muted">
+      <li>받은 파일(<code>ntfy-병원설정-….json</code>)을 병원 휴대폰으로 보냅니다 (카카오톡 나에게 보내기 · 이메일 · USB).</li>
+      <li>휴대폰에서 파일을 <b>다운로드</b> 폴더에 저장합니다.</li>
+      <li>ntfy → ⋮ → <b>설정</b> → 맨 아래 <b>백업 및 복원</b> → <b>파일에서 복원</b> → 받은 파일 선택.</li>
+    </ol>
+    <p class="muted">⚠️ 이 파일에는 토픽 이름이 들어 있습니다. <b>GitHub 등 공개된 곳에 올리지 마세요.</b></p>
+  </div>
+
+  <details class="card">
+    <summary>파일 내용 미리 보기</summary>
+    <pre id="preview">(만들기를 누르면 표시됩니다)</pre>
+  </details>
+</main>
+
+<script>
+// Code.gs CONFIG.REGIONS 순서와 같아야 함 (토픽 번호 1~4)
+const REGIONS = ['서울', '인천', '경기', '기타'];
+const BASE_URL = 'https://ntfy.sh';
+
+const box = document.getElementById('regions');
+REGIONS.forEach((r, i) => {
+  box.insertAdjacentHTML('beforeend',
+    `<label><input type="checkbox" value="${i + 1}" ${i === 0 ? 'checked' : ''}> ${r}</label>`);
+});
+
+/** 입력한 토픽에서 접두어(par-…)만 꺼낸다. 끝의 -1..4 는 지역 번호. */
+function prefixOf(topic) {
+  const t = topic.trim().replace(/^.*\//, ''); // ntfy://ntfy.sh/<topic> 이나 https://ntfy.sh/<topic> 도 허용
+  const m = t.match(/^([A-Za-z0-9_-]+)-([1-4])$/);
+  return m ? m[1] : null;
+}
+
+/** ntfy-android Backuper.kt (v1.25.2) 의 BackupFile 형식 */
+function buildBackup(prefix, regionNos) {
+  const baseId = Date.now() * 10;
+  return {
+    magic: 'ntfy2586',
+    version: 1,
+    settings: null,          // 앱 전체 설정은 건드리지 않음
+    subscriptions: regionNos.map((n, i) => ({
+      id: baseId + i,
+      baseUrl: BASE_URL,
+      topic: `${prefix}-${n}`,
+      instant: true,           // 즉시 전달 (Firebase 지연 없음)
+      dedicatedChannels: false, // 'ntfy-max'(우선순위 최상) 채널 소리를 그대로 씀 → 사이렌 설정 유지
+      mutedUntil: 0,
+      minPriority: null,       // 전체 설정 따름
+      autoDelete: null,        // 전체 설정 따름
+      insistent: 1,            // 계속 울리기 켬 (Repository.INSISTENT_MAX_PRIORITY_ENABLED)
+      lastNotificationId: null,
+      icon: null,
+      upAppId: null,
+      upConnectorToken: null,
+      displayName: `🚑 ${REGIONS[n - 1]} 환자 수용 요청`
+    })),
+    notifications: null,
+    users: null
+  };
+}
+
+document.getElementById('make').addEventListener('click', () => {
+  const msg = document.getElementById('msg');
+  const prefix = prefixOf(document.getElementById('topic').value);
+  const regionNos = [...box.querySelectorAll('input:checked')].map(c => Number(c.value));
+  if (!prefix) { msg.className = 'err'; msg.textContent = '토픽 이름 형식이 맞지 않습니다. 예: par-xxxxxxxx-1'; return; }
+  if (!regionNos.length) { msg.className = 'err'; msg.textContent = '지역을 하나 이상 고르세요.'; return; }
+
+  const json = JSON.stringify(buildBackup(prefix, regionNos), null, 2);
+  document.getElementById('preview').textContent = json;
+
+  const names = regionNos.map(n => REGIONS[n - 1]).join('-');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  a.download = `ntfy-병원설정-${names}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+  msg.className = 'ok';
+  msg.textContent = `✅ ${a.download} 다운로드됨 — 토픽: ` + regionNos.map(n => `${prefix}-${n}`).join(', ');
+});
+</script>
+</body>
+</html>
