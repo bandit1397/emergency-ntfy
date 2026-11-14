@@ -66,7 +66,8 @@
 
 - 링크: 상위 `README.md` 설정 변경 · `phone-setup/README.md` 관리자 항목 → PDF 13번 (마지막 쪽)
 - 왜: 서울 토픽 이름이 CLAUDE.md 에 적혀 공개됐었음 (커밋 `8ba6d78` 부터, `a1bfd51` 에서 지움). 지금 파일엔 없지만 **git 기록에는 남아 있음**
-  → 기록 지우기(강제 push) 대신 `NTFY_PREFIX` 를 바꾸기로 안내. **실제로 바꿨는지는 아직 모름 (사용자가 직접 할 일)**
+  → 기록 지우기(강제 push) 대신 `NTFY_PREFIX` 를 바꾸기로 안내.
+  **✅ 완료 (2026-11-15, 사용자가 직접 바꿈)** → git 기록에 남은 옛 토픽은 이제 쓰이지 않음. 새 이름은 저장소에 쓰지 말 것
 - 동작 (`Code.gs` `ntfyTopic_`): 속성이 없으면 `par-` + 16자(`abcdefghijkmnpqrstuvwxyz23456789`)를 만들어 저장.
   `ntfyTopics`(병원 화면 열기) · `createRequest`(요청) 어느 쪽이든 먼저 부르는 순간 생성 → **코드 수정 · 다시 배포 필요 없음**
 - 절차 요약: ① Apps Script 스크립트 속성에서 `NTFY_PREFIX` 만 삭제 · 저장 (`ACCESS_CODE` · `NTFY_SLOT_*` 는 그대로)
